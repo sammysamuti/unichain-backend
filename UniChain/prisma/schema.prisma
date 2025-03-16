@@ -172,3 +172,43 @@ enum ItemStatus {
   FOUND
   RETURNED
 }
+
+
+model Session {
+  id          Int       @id @default(uuid())
+  studentId   Int // Reference to Student
+  counselorId String // Reference to Counselor
+  dateTime    DateTime
+  status      SessionStatus @default(PENDING)
+  paymentTx   String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  student     Student       @relation(fields: [studentId], references: [id])
+  counselor   Counselor     @relation(fields: [counselorId], references: [id])
+}
+
+enum Role {
+  USER
+  COUNSELOR
+  ADMIN
+}
+
+enum SessionStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+  COMPLETED
+}
+
+model Counselor {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  expertise    String
+  bio          String?
+  availability Json
+  rating       Float?    @default(0)
+  sessions     Session[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
