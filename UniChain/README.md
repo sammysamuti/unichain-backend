@@ -368,3 +368,88 @@ PUT /sessions/status
 }
 ```
 
+
+
+```markdown
+# API Endpoints
+
+## 1️⃣ Get Sessions by Student ID
+
+### Endpoint
+`GET /api/sessions/student/{studentId}`
+
+### Description
+Returns all sessions linked to a specific student.
+
+### Path Parameters
+| Parameter   | Type  | Required | Description            |
+|-------------|-------|----------|------------------------|
+| `studentId` | Int   | ✅ Yes   | The ID of the student  |
+
+### Response Example (200 OK)
+
+```json
+[
+  {
+    "id": "f3a6bc5d-1c3e-42d5-a9f2-4c45e1c1a4e7",
+    "counselorId": "abc123",
+    "dateTime": "2025-03-16T14:00:00.000Z",
+    "status": "CONFIRMED"
+  },
+  {
+    "id": "b7e5d8f4-12a3-4d9c-b8a1-5e7e1d7c9a8b",
+    "counselorId": "def456",
+    "dateTime": "2025-03-18T10:00:00.000Z",
+    "status": "PENDING"
+  }
+]
+```
+
+### Error Responses
+| Status Code | Description                        |
+|-------------|------------------------------------|
+| `404`       | No sessions found for this student |
+| `500`       | Internal server error             |
+
+---
+
+## 2️⃣ Get Sessions by Counselor ID
+
+### Endpoint
+`GET /api/sessions/counselor/{counselorId}`
+
+### Description
+Returns all sessions assigned to a specific counselor.
+
+### Path Parameters
+| Parameter    | Type   | Required | Description            |
+|--------------|--------|----------|------------------------|
+| `counselorId`| String | ✅ Yes   | The ID of the counselor|
+
+### Response Example (200 OK)
+
+```json
+[
+  {
+    "id": "f3a6bc5d-1c3e-42d5-a9f2-4c45e1c1a4e7",
+    "studentId": 123,
+    "dateTime": "2025-03-16T14:00:00.000Z",
+    "status": "CONFIRMED"
+  },
+  {
+    "id": "c8f9d2a4-91e4-4d1b-a3e9-3b7c4e5f6d7a",
+    "studentId": 456,
+    "dateTime": "2025-03-19T16:30:00.000Z",
+    "status": "CANCELLED"
+  }
+]
+```
+
+### Error Responses
+| Status Code | Description                       |
+|-------------|-----------------------------------|
+| `404`       | No sessions found for this counselor|
+| `500`       | Internal server error            |
+```
+
+This complete text is formatted to be used in a README file for your API documentation. Let me know if you need further adjustments!

@@ -29,6 +29,37 @@ export const bookSession = async (req: Request, res: Response) => {
       res.status(500).json({ message: 'Error creating session.' });
     }
   };
+
+
+  export const getSessionsByStudent = async (req: Request, res: Response) => {
+    const { studentId } = req.params;
+  
+    try {
+      const sessions = await sessionService.getSessionsByStudentId(Number(studentId));
+  
+      if (!sessions.length) return res.status(404).json({ message: "No sessions found for this student" });
+  
+      return res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching student sessions:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
+  
+  export const getSessionsByCounselor = async (req: Request, res: Response) => {
+    const { counselorId } = req.params;
+  
+    try {
+      const sessions = await sessionService.getSessionsByCounselorId(counselorId);
+  
+      if (!sessions.length) return res.status(404).json({ message: "No sessions found for this counselor" });
+  
+      return res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching counselor sessions:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
 // Get counselor availability (time slots)
 export const getCounselorAvailability = async (req: Request, res: Response) => {
   try {

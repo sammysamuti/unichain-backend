@@ -12,4 +12,7 @@ router.get('/counselors/:counselorId/availability', sessionController.getCounsel
 // Route to update the session status (after payment or after completion)
 router.put('/status', sessionController.updateSessionStatus);
 
+router.get("/student/:studentId", sessionController.getSessionsByStudent);
+router.get("/counselor/:counselorId", sessionController.getSessionsByCounselor);
+
 export default router;

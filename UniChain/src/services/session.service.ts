@@ -17,6 +17,7 @@ export const createSession = async (studentId: number, counselorId: string, date
   return session;
 };
 
+
 // Get the available times for a specific counselor
 export const getCounselorAvailability = async (counselorId: string) => {
   // Assuming availability is stored as JSON in the `availability` field of the Counselor model
@@ -36,4 +37,22 @@ export const updateSessionStatus = async (sessionId: string, status: SessionStat
   });
 
   return session;
+};
+
+export const getSessionsByStudentId = async (studentId: number) => {
+  return await prisma.session.findMany({
+    where: { studentId },
+    include: {
+      counselor: { select: { id: true, name: true, expertise: true } },
+    },
+  });
+};
+
+export const getSessionsByCounselorId = async (counselorId: string) => {
+  return await prisma.session.findMany({
+    where: { counselorId },
+    include: {
+      student: { select: { id: true, name: true, email: true } },
+    },
+  });
 };
