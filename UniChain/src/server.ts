@@ -5,9 +5,6 @@ import studentRoutes from './routes/student.routes';
 
 const PORT = 8000;;
 
-// Register routes
-app.use('/api/lost-items', lostItemRoutes);
-app.use('/api/students', studentRoutes);
 
 const server = createServer(app);
 if (process.env.VERCEL) {
