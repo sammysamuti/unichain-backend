@@ -283,3 +283,88 @@ Degrees can be minted as NFTs on the Solana blockchain using the following endpo
      "password": "securepassword123"
    }'
 
+
+
+
+### 🗓️ **1. Book a Session**
+
+**Endpoint:**
+```http
+POST /sessions
+```
+
+**Request Body:**
+```json
+{
+  "studentId": 1,
+  "counselorId": "counselor-id-uuid",
+  "dateTime": "2025-03-20T10:00:00Z",
+  "paymentTx": "payment-transaction-id"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "session-uuid",
+  "studentId": 1,
+  "counselorId": "counselor-id-uuid",
+  "dateTime": "2025-03-20T10:00:00Z",
+  "status": "PENDING",
+  "paymentTx": "payment-transaction-id",
+  "createdAt": "2025-03-14T14:00:00Z",
+  "updatedAt": "2025-03-14T14:00:00Z"
+}
+```
+
+---
+
+### 🕒 **2. Get Counselor Availability**
+
+**Endpoint:**
+```http
+GET /counselors/:counselorId/availability
+```
+
+**Response:**
+```json
+{
+  "availability": {
+    "monday": ["09:00", "10:00", "11:00"],
+    "tuesday": ["14:00", "15:00"],
+    "wednesday": ["09:00", "10:00"]
+  }
+}
+```
+
+---
+
+### ✅ **3. Update Session Status**
+
+**Endpoint:**
+```http
+PUT /sessions/status
+```
+
+**Request Body:**
+```json
+{
+  "sessionId": "session-uuid",
+  "status": "COMPLETED"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "session-uuid",
+  "studentId": 1,
+  "counselorId": "counselor-id-uuid",
+  "dateTime": "2025-03-20T10:00:00Z",
+  "status": "COMPLETED",
+  "paymentTx": "payment-transaction-id",
+  "createdAt": "2025-03-14T14:00:00Z",
+  "updatedAt": "2025-03-14T14:15:00Z"
+}
+```
+
