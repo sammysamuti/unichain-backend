@@ -38,6 +38,7 @@ model Student {
   claims         LostClaim[] @relation("StudentClaims")
   foundItems     LostItem[]  @relation("FoundItems")
   lostItems      LostItem[]  @relation("LostItems")
+  Session        Session[]
 }
 
 model StudentDegree {
@@ -127,13 +128,13 @@ model LostClaim {
 }
 
 model Notification {
-  id          Int      @id @default(autoincrement())
-  title       String
-  message     String
-  recipient   String   // e.g., "All Users", "Students", "Faculty"
-  sentAt      DateTime @default(now())
-  sentBy      String   // e.g., "Admin", "System"
-  type        String   // e.g., "System", "Academic", "Security"
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  recipient String // e.g., "All Users", "Students", "Faculty"
+  sentAt    DateTime @default(now())
+  sentBy    String // e.g., "Admin", "System"
+  type      String // e.g., "System", "Academic", "Security"
 }
 
 model upcomingSession {
@@ -173,9 +174,8 @@ enum ItemStatus {
   RETURNED
 }
 
-
 model Session {
-  id          Int       @id @default(uuid())
+  id          String        @id @default(uuid())
   studentId   Int // Reference to Student
   counselorId String // Reference to Counselor
   dateTime    DateTime
