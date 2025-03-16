@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model University {
+  id            Int      @id @default(autoincrement())
+  name          String
+  walletAddress String   @unique
+  seedPhrase    String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  location      String
+  email         String   @unique
+  password      String
+}
+
+model Student {
+  id             Int         @id @default(autoincrement())
+  walletAddress  String      @unique
+  seedPhrase     String      @unique
+  name           String
+  email          String      @unique
+  universityId   String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  department     String
+  password       String
+  telegramId     String?
+  university     String
+  batch          String
+  itemsFound     FoundItem[] @relation("StudentFoundItems")
+  reviewedClaims LostClaim[] @relation("reviewedClaims")
+  claims         LostClaim[] @relation("StudentClaims")
+  foundItems     LostItem[]  @relation("FoundItems")
+  lostItems      LostItem[]  @relation("LostItems")
+}
+
+model StudentDegree {
+  id                String   @id @default(uuid())
+  fullName          String
+  dateOfBirth       DateTime
+  gender            String
+  nationalId        String?
+  email             String?  @unique
+  degreeName        String
+  major             String
+  graduationDate    DateTime
+  cgpa              String
+  honors            String?
+  creditsEarned     Int
+  thesisTitle       String?
+  universityName    String
+  universityAddress String
+  accreditation     String
+  faculty           String
+  deanName          String?
+  registrarName     String?
+  certificateNumber String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  studentId         Int
+  universityId      Int
+}
+
+model LostItem {
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String
+  location    String
+  dateLost    DateTime
+  imageUrl    String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  ownerId     Int
+  finderId    Int?
+  category    String?
+  status      ItemStatus  @default(LOST)
+  claims      LostClaim[]
+  finder      Student?    @relation("FoundItems", fields: [finderId], references: [id])
+  owner       Student     @relation("LostItems", fields: [ownerId], references: [id])
+}
+
+model FoundItem {
+  id          Int         @id @default(autoincrement())
+  title       String
+  description String
+  location    String
+  dateFound   DateTime
+  imageUrl    String?
+  category    String?
+  status      ItemStatus  @default(FOUND)
+  isReturned  Boolean     @default(false)
+  finderId    Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  finder      Student     @relation("StudentFoundItems", fields: [finderId], references: [id])
+  claims      LostClaim[]
+}
+
+model LostClaim {
+  id           Int         @id @default(autoincrement())
+  lostItemId   Int
+  message      String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  studentId    Int
+  foundItemId  Int
+  proofDetails String
+  returnedAt   DateTime?
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedBy   Int?
+  status       ClaimStatus @default(PENDING)
+  foundItem    FoundItem   @relation(fields: [foundItemId], references: [id])
+  lostItem     LostItem    @relation(fields: [lostItemId], references: [id])
+  reviewer     Student?    @relation("reviewedClaims", fields: [reviewedBy], references: [id])
+  student      Student     @relation("StudentClaims", fields: [studentId], references: [id])
+
+  @@index([foundItemId])
+  @@index([lostItemId])
+  @@index([reviewedBy])
+}
+
+model upcomingSession {
+  id    Int    @id @default(autoincrement())
+  title String
+  date  String
+  time  String
+  type  String
+}
+
+model resources {
+  id    Int    @id @default(autoincrement())
+  title String
+  link  String
+  type  String
+  time  String
+}
+
+model supportCommunity {
+  id     Int    @id @default(autoincrement())
+  name   String
+  member String
+  type   String
+  link   String
+}
+
+enum ClaimStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum ItemStatus {
+  LOST
+  CLAIMED
+  FOUND
+  RETURNED
+}
