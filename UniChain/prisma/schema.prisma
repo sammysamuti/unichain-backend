@@ -126,6 +126,16 @@ model LostClaim {
   @@index([reviewedBy])
 }
 
+model Notification {
+  id          Int      @id @default(autoincrement())
+  title       String
+  message     String
+  recipient   String   // e.g., "All Users", "Students", "Faculty"
+  sentAt      DateTime @default(now())
+  sentBy      String   // e.g., "Admin", "System"
+  type        String   // e.g., "System", "Academic", "Security"
+}
+
 model upcomingSession {
   id    Int    @id @default(autoincrement())
   title String
