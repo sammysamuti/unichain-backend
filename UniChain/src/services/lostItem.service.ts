@@ -34,7 +34,19 @@ export class LostItemService {
   private prisma: PrismaClient;
 
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = new PrismaClient({
+      log: ['query', 'info', 'warn', 'error'],
+    });
+  }
+
+  private async testConnection() {
+    try {
+      await this.prisma.$connect();
+      console.log('Successfully connected to the database');
+    } catch (error) {
+      console.error('Database connection error:', error);
+      throw error;
+    }
   }
 
   private validateId(id: number, field: string) {
@@ -140,6 +152,8 @@ export class LostItemService {
 
   async createLostItem(data: CreateLostItemDto) {
     try {
+      await this.testConnection();
+
       // Validate required fields
       this.validateRequiredString(data.title, 'title', 100);
       this.validateRequiredString(data.description, 'description', 500);
@@ -172,6 +186,7 @@ export class LostItemService {
 
       return lostItem;
     } catch (error) {
+      console.error('Detailed error in createLostItem:', error);
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -194,7 +209,7 @@ export class LostItemService {
       throw new ValidationError(
         500,
         'Internal server error',
-        'An unexpected error occurred while creating the lost item'
+        error instanceof Error ? error.message : 'An unexpected error occurred while creating the lost item'
       );
     }
   }
@@ -208,68 +223,44 @@ export class LostItemService {
     limit?: number;
   }) {
     try {
-      const where: Prisma.LostItemWhereInput = {
-        status: 'LOST',
-      };
+      await this.testConnection();
 
-      // Validate and apply filters
+      const limit = Number(filters.limit) || 10;
+      const page = Number(filters.page) || 1;
+      const where: any = {};
+
       if (filters.category) {
         this.validateOptionalString(filters.category, 'category', 50);
-        where.category = filters.category.trim();
+        where.category = filters.category;
       }
 
       if (filters.location) {
         this.validateOptionalString(filters.location, 'location', 200);
-        where.location = {
-          contains: filters.location.trim(),
-          mode: 'insensitive'
-        };
+        where.location = filters.location;
       }
 
-      // Validate and parse dates
       if (filters.dateFrom || filters.dateTo) {
-        const dateLostFilter: Prisma.DateTimeFilter = {};
-        where.dateLost = dateLostFilter;
-        
-        if (filters.dateFrom) {
-          const dateFrom = this.validateDate(filters.dateFrom, 'date from');
-          dateLostFilter.gte = dateFrom;
-        }
-        
-        if (filters.dateTo) {
-          const dateTo = this.validateDate(filters.dateTo, 'date to');
-          dateLostFilter.lte = dateTo;
-        }
+        const dateFrom = filters.dateFrom ? this.validateDate(filters.dateFrom, 'date from') : undefined;
+        const dateTo = filters.dateTo ? this.validateDate(filters.dateTo, 'date to') : undefined;
 
-        if (dateLostFilter.gte && dateLostFilter.lte && dateLostFilter.gte > dateLostFilter.lte) {
-          throw new ValidationError(
-            400,
-            'Invalid date range',
-            'The start date must be before the end date'
-          );
+        if (dateFrom && dateTo) {
+          where.dateLost = {
+            gte: dateFrom,
+            lte: dateTo
+          };
+        } else if (dateFrom) {
+          where.dateLost = {
+            gte: dateFrom
+          };
+        } else if (dateTo) {
+          where.dateLost = {
+            lte: dateTo
+          };
         }
       }
 
-      // Validate pagination
-      const page = filters.page ? Number(filters.page) : 1;
-      const limit = filters.limit ? Number(filters.limit) : 10;
-
-      if (isNaN(page) || page < 1) {
-        throw new ValidationError(
-          400,
-          'Invalid page number',
-          'The page number must be a positive integer'
-        );
-      }
-
-      if (isNaN(limit) || limit < 1 || limit > 100) {
-        throw new ValidationError(
-          400,
-          'Invalid limit value',
-          'The limit must be between 1 and 100'
-        );
-      }
-
+      console.log('Executing query with where clause:', JSON.stringify(where, null, 2));
+      
       const items = await this.prisma.lostItem.findMany({
         where,
         include: {
@@ -283,21 +274,34 @@ export class LostItemService {
         }
       });
 
+      console.log(`Successfully retrieved ${items.length} items`);
       return items;
     } catch (error) {
+      console.error('Detailed error in getLostItems:', error);
       if (error instanceof ValidationError) {
         throw error;
+      }
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        console.error('Prisma error code:', error.code);
+        console.error('Prisma error message:', error.message);
+        throw new ValidationError(
+          500,
+          'Database error',
+          `A database error occurred: ${error.message}`
+        );
       }
       throw new ValidationError(
         500,
         'Internal server error',
-        'An unexpected error occurred while retrieving lost items'
+        error instanceof Error ? error.message : 'An unexpected error occurred while retrieving lost items'
       );
     }
   }
 
   async getLostItemById(id: number) {
     try {
+      await this.testConnection();
+
       this.validateId(id, 'item');
 
       const item = await this.prisma.lostItem.findUnique({
@@ -318,19 +322,22 @@ export class LostItemService {
 
       return item;
     } catch (error) {
+      console.error('Detailed error in getLostItemById:', error);
       if (error instanceof ValidationError) {
         throw error;
       }
       throw new ValidationError(
         500,
         'Internal server error',
-        'An unexpected error occurred while retrieving the lost item'
+        error instanceof Error ? error.message : 'An unexpected error occurred while retrieving the lost item'
       );
     }
   }
 
   async getLostItemsByUserId(ownerId: number) {
     try {
+      await this.testConnection();
+
       this.validateId(ownerId, 'owner');
 
       // Check if user exists through lost items
@@ -360,19 +367,22 @@ export class LostItemService {
 
       return items;
     } catch (error) {
+      console.error('Detailed error in getLostItemsByUserId:', error);
       if (error instanceof ValidationError) {
         throw error;
       }
       throw new ValidationError(
         500,
         'Internal server error',
-        'An unexpected error occurred while retrieving user lost items'
+        error instanceof Error ? error.message : 'An unexpected error occurred while retrieving user lost items'
       );
     }
   }
 
   async updateLostItem(id: number, ownerId: number, data: UpdateLostItemDto) {
     try {
+      await this.testConnection();
+
       this.validateId(id, 'item');
       this.validateId(ownerId, 'owner');
 
@@ -426,6 +436,7 @@ export class LostItemService {
 
       return updatedItem;
     } catch (error) {
+      console.error('Detailed error in updateLostItem:', error);
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -441,13 +452,15 @@ export class LostItemService {
       throw new ValidationError(
         500,
         'Internal server error',
-        'An unexpected error occurred while updating the lost item'
+        error instanceof Error ? error.message : 'An unexpected error occurred while updating the lost item'
       );
     }
   }
 
   async deleteLostItem(id: number, ownerId: number) {
     try {
+      await this.testConnection();
+
       this.validateId(id, 'item');
       this.validateId(ownerId, 'owner');
 
@@ -491,6 +504,7 @@ export class LostItemService {
         where: { id }
       });
     } catch (error) {
+      console.error('Detailed error in deleteLostItem:', error);
       if (error instanceof ValidationError) {
         throw error;
       }
@@ -506,7 +520,7 @@ export class LostItemService {
       throw new ValidationError(
         500,
         'Internal server error',
-        'An unexpected error occurred while deleting the lost item'
+        error instanceof Error ? error.message : 'An unexpected error occurred while deleting the lost item'
       );
     }
   }

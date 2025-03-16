@@ -71,6 +71,30 @@ export class FoundItemController {
     }
   }
 
+  // Get found items by user ID
+  async getFoundItemsByUserId(req: Request, res: Response) {
+    try {
+      const foundItems = await foundItemService.getFoundItemsByFinderId(Number(req.params.userId));
+      return res.status(200).json({
+        message: foundItems.length ? 'User found items retrieved successfully' : 'No found items found for this user',
+        error: null,
+        data: foundItems
+      });
+    } catch (error) {
+      console.error('Error in getFoundItemsByUserId:', error);
+      if (error instanceof ValidationError) {
+        return res.status(error.status).json({
+          message: error.message,
+          error: error.details
+        });
+      }
+      return res.status(500).json({
+        message: 'Internal server error',
+        error: 'An unexpected error occurred while retrieving user found items'
+      });
+    }
+  }
+
   // Get found item by ID
   async getFoundItemById(req: Request, res: Response) {
     try {
@@ -176,4 +200,4 @@ export class FoundItemController {
       });
     }
   }
-} 
+}
