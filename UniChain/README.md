@@ -282,5 +282,4 @@ Degrees can be minted as NFTs on the Solana blockchain using the following endpo
      "email": "student@example.com",
      "password": "securepassword123"
    }'
-   ```
-   {{ ... }}
+
