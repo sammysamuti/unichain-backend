@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dist/server.js",
   "engines": {
-    "node": "16.13.0"
+    "node": "20.16.0"
   },
   "directories": {
     "test": "tests"
