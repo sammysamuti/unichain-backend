@@ -13,6 +13,7 @@ import lostItemRoutes from './routes/lostItem.routes';
 import foundItemRoutes from './routes/foundItem.routes';
 import lostClaimRoutes from './routes/lostClaim.routes';
 import counselingRoutes from "./routes/counseling.routes";
+import sessionRoutes from "./routes/session.routes";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/api/lostItems', lostItemRoutes);
 app.use('/api/foundItems', foundItemRoutes);
 app.use('/api/claims', lostClaimRoutes);
 app.use("/api/counselors", counselingRoutes);
+app.use("/api/sessions", sessionRoutes);
 
 app.get("/", (req, res) => {
   res.send("Unichain Service  Is  Running");
